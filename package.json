@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@react-native-vector-icons/material-design-icons": "^12.4.1",
+    "babel-preset-expo": "~54.0.10",
     "expo": "~54.0.33",
     "expo-router": "^6.0.23",
     "expo-status-bar": "~3.0.9",
@@ -25,11 +26,14 @@
   "devDependencies": {
     "@testing-library/jest-native": "^5.4.0",
     "@testing-library/react-native": "^13.3.0",
-    "jest-expo": "^48.0.0"
+    "jest-expo": "^48.0.0",
+    "react-test-renderer": "19.1.0"
   },
   "jest": {
     "preset": "jest-expo",
-    "setupFilesAfterEnv": ["<rootDir>/jest-setup.js"],
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest-setup.js"
+    ],
     "transformIgnorePatterns": [
       "node_modules/(?!(jest-)?react-native|@react-native|@react-navigation|@expo|expo-router)"
     ]
