@@ -1,13 +1,15 @@
 import { FlatList, View, StyleSheet } from "react-native";
 import { useEffect, useState } from "react";
-import { List, TextInput, Text, Avatar, TouchableRipple } from 'react-native-paper';
+import { List, TextInput, Text, Avatar, TouchableRipple, Button } from 'react-native-paper';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import AgregarAlumnoModal from '../components/AgregarAlumnoModal';
 
 // Function to separate names
 export default function Alumnos() {
   const [alumnos, setAlumnos] = useState([]);
   const [alumnosFiltrados, setAlumnosFiltrados] = useState([]);
   const [query, setQuery] = useState('');
+  const [showAgregarModal, setShowAgregarModal] = useState(false);
 
   // separa nombre completo en { apellidos, nombre }
   const separateNames = (initialAlumnos) => {
@@ -152,8 +154,32 @@ export default function Alumnos() {
     return (parts[0][0] + parts[1][0]).toUpperCase();
   }
 
+  const handleVisualAdd = () => {
+    // Placeholder visual; en el siguiente paso aquí conectamos la lógica de inmutabilidad.
+  }
+
   return (
     <View style={styles.container}>
+      <Button
+        mode="contained"
+        icon="account-plus"
+        onPress={() => setShowAgregarModal(true)}
+        buttonColor={PRIMARY}
+        textColor="#ffffff"
+        style={styles.openModalButton}
+        contentStyle={styles.openModalButtonContent}
+      >
+        Nuevo Alumno
+      </Button>
+
+      <AgregarAlumnoModal
+        visible={showAgregarModal}
+        onDismiss={() => setShowAgregarModal(false)}
+        onAdd={handleVisualAdd}
+        primaryColor={PRIMARY}
+        secondaryColor={SECONDARY}
+      />
+
       <List.Accordion title="Opciones de orden" titleStyle={{ color: PRIMARY }} left={props => <List.Icon {...props} icon="sort" color={PRIMARY} />}>
         <List.Item
           title="Nombre A → Z"
@@ -246,6 +272,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     borderRadius: 8,
     borderColor: '#d1fae5'
+  },
+  openModalButton: {
+    marginBottom: 10,
+    borderRadius: 10
+  },
+  openModalButtonContent: {
+    paddingVertical: 6
   },
   center: {
     flex: 1,
