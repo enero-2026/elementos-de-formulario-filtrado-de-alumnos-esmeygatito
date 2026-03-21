@@ -1,8 +1,10 @@
 import { FlatList, View, StyleSheet } from "react-native";
 import { useEffect, useState } from "react";
-import { List, TextInput, Text, Avatar, TouchableRipple, Button } from 'react-native-paper';
+import { List, TextInput, Text, Avatar, TouchableRipple, Button, IconButton } from 'react-native-paper';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AgregarAlumnoModal from '../components/AgregarAlumnoModal';
+import EditarAlumnoModal from '../components/EditarAlumnoModal';
+import EliminarAlumnoModal from '../components/EliminarAlumnoModal';
 
 // Function to separate names
 export default function Alumnos() {
@@ -10,6 +12,9 @@ export default function Alumnos() {
   const [alumnosFiltrados, setAlumnosFiltrados] = useState([]);
   const [query, setQuery] = useState('');
   const [showAgregarModal, setShowAgregarModal] = useState(false);
+  const [showEditarModal, setShowEditarModal] = useState(false);
+  const [showEliminarModal, setShowEliminarModal] = useState(false);
+  const [selectedAlumno, setSelectedAlumno] = useState(null);
 
   // separa nombre completo en { apellidos, nombre }
   const separateNames = (initialAlumnos) => {
@@ -168,6 +173,54 @@ export default function Alumnos() {
     setAlumnos(prevAlumnos => [...prevAlumnos, alumnoSeparado]);
   }
 
+  const openEditarModal = (alumno) => {
+    setSelectedAlumno(alumno);
+    setShowEditarModal(true);
+  }
+
+  const openEliminarModal = (alumno) => {
+    setSelectedAlumno(alumno);
+    setShowEliminarModal(true);
+  }
+
+  const handleSaveEdit = (alumnoEditado) => {
+    const matricula = (alumnoEditado?.matricula || '').trim();
+    const nombreCompleto = (alumnoEditado?.nombre || '').trim().toUpperCase();
+    if (!matricula || !nombreCompleto) return;
+
+    const [alumnoSeparado] = separateNames([
+      { matricula, nombre: nombreCompleto }
+    ]);
+
+    setAlumnos(prevAlumnos =>
+      prevAlumnos.map(alumno =>
+        alumno.matricula === matricula
+          ? { ...alumno, apellidos: alumnoSeparado.apellidos, nombre: alumnoSeparado.nombre }
+          : alumno
+      )
+    );
+    setSelectedAlumno(null);
+  }
+
+  const handleConfirmDelete = () => {
+    const matricula = (selectedAlumno?.matricula || '').trim();
+    if (!matricula) return;
+
+    setAlumnos(prevAlumnos => prevAlumnos.filter(alumno => alumno.matricula !== matricula));
+    setShowEliminarModal(false);
+    setSelectedAlumno(null);
+  }
+
+  const handleCloseEditarModal = () => {
+    setShowEditarModal(false);
+    setSelectedAlumno(null);
+  }
+
+  const handleCloseEliminarModal = () => {
+    setShowEliminarModal(false);
+    setSelectedAlumno(null);
+  }
+
   return (
     <View style={styles.container}>
       <Button
@@ -187,6 +240,24 @@ export default function Alumnos() {
         onDismiss={() => setShowAgregarModal(false)}
         onAdd={handleVisualAdd}
         existingMatriculas={alumnos.map(alumno => alumno.matricula)}
+        primaryColor={PRIMARY}
+        secondaryColor={SECONDARY}
+      />
+
+      <EditarAlumnoModal
+        visible={showEditarModal}
+        alumno={selectedAlumno}
+        onDismiss={handleCloseEditarModal}
+        onSave={handleSaveEdit}
+        primaryColor={PRIMARY}
+        secondaryColor={SECONDARY}
+      />
+
+      <EliminarAlumnoModal
+        visible={showEliminarModal}
+        alumno={selectedAlumno}
+        onDismiss={handleCloseEliminarModal}
+        onConfirm={handleConfirmDelete}
         primaryColor={PRIMARY}
         secondaryColor={SECONDARY}
       />
@@ -263,7 +334,22 @@ export default function Alumnos() {
                   <Text variant="titleMedium" style={styles.name}>{`${item.apellidos} ${item.nombre}`.trim()}</Text>
                   <Text variant="bodySmall" style={styles.matricula}>{item.matricula}</Text>
                 </View>
-                <MaterialIcons name="chevron-right" size={24} color={PRIMARY} />
+                <View style={styles.actionsContainer}>
+                  <IconButton
+                    icon="pencil"
+                    size={20}
+                    iconColor={PRIMARY}
+                    onPress={() => openEditarModal(item)}
+                    style={styles.iconButton}
+                  />
+                  <IconButton
+                    icon="trash-can-outline"
+                    size={20}
+                    iconColor={SECONDARY}
+                    onPress={() => openEliminarModal(item)}
+                    style={styles.iconButton}
+                  />
+                </View>
               </View>
             </TouchableRipple>
           )}
@@ -314,6 +400,13 @@ const styles = StyleSheet.create({
   },
   info: {
     flex: 1,
+  },
+  actionsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  iconButton: {
+    margin: 0
   },
   name: {
     marginBottom: 2,
