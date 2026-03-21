@@ -154,8 +154,18 @@ export default function Alumnos() {
     return (parts[0][0] + parts[1][0]).toUpperCase();
   }
 
-  const handleVisualAdd = () => {
-    // Placeholder visual; en el siguiente paso aquí conectamos la lógica de inmutabilidad.
+  const handleVisualAdd = (nuevoAlumno) => {
+    const matricula = (nuevoAlumno?.matricula || '').trim();
+    const nombreCompleto = (nuevoAlumno?.nombre || '').trim().toUpperCase();
+
+    if (!matricula || !nombreCompleto) return;
+    if (alumnos.some(alumno => (alumno.matricula || '').trim() === matricula)) return;
+
+    const [alumnoSeparado] = separateNames([
+      { matricula, nombre: nombreCompleto }
+    ]);
+
+    setAlumnos(prevAlumnos => [...prevAlumnos, alumnoSeparado]);
   }
 
   return (
@@ -176,6 +186,7 @@ export default function Alumnos() {
         visible={showAgregarModal}
         onDismiss={() => setShowAgregarModal(false)}
         onAdd={handleVisualAdd}
+        existingMatriculas={alumnos.map(alumno => alumno.matricula)}
         primaryColor={PRIMARY}
         secondaryColor={SECONDARY}
       />

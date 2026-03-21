@@ -1,16 +1,22 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Modal, Portal, Text, TextInput, Button } from 'react-native-paper';
+import { Modal, Portal, Text, TextInput, Button, HelperText } from 'react-native-paper';
 
 export default function AgregarAlumnoModal({
   visible,
   onDismiss,
   onAdd,
+  existingMatriculas = [],
   primaryColor = '#16a34a',
   secondaryColor = '#ec4899'
 }) {
   const [matricula, setMatricula] = useState('');
   const [nombre, setNombre] = useState('');
+  const normalizedMatricula = matricula.trim();
+  const isDuplicateMatricula =
+    normalizedMatricula.length > 0 &&
+    existingMatriculas.some(m => (m || '').trim() === normalizedMatricula);
+  const isFormValid = normalizedMatricula.length > 0 && nombre.trim().length > 0 && !isDuplicateMatricula;
 
   const handleCancel = () => {
     setMatricula('');
@@ -19,6 +25,8 @@ export default function AgregarAlumnoModal({
   };
 
   const handleAdd = () => {
+    if (!isFormValid) return;
+
     // Preparado para conectar la lógica en el siguiente paso.
     onAdd?.({ matricula: matricula.trim(), nombre: nombre.trim() });
     setMatricula('');
@@ -42,11 +50,17 @@ export default function AgregarAlumnoModal({
           label="Matrícula"
           value={matricula}
           onChangeText={setMatricula}
+          keyboardType="numeric"
+          error={isDuplicateMatricula}
           style={styles.input}
           outlineColor="#d1fae5"
           activeOutlineColor={primaryColor}
           textColor="#064e3b"
         />
+
+        <HelperText type="error" visible={isDuplicateMatricula} style={styles.errorText}>
+          Esta matrícula ya existe. Ingresa una diferente.
+        </HelperText>
 
         <TextInput
           mode="outlined"
@@ -72,6 +86,7 @@ export default function AgregarAlumnoModal({
           <Button
             mode="contained"
             onPress={handleAdd}
+            disabled={!isFormValid}
             buttonColor={primaryColor}
             textColor="#ffffff"
             style={styles.button}
@@ -100,6 +115,10 @@ const styles = StyleSheet.create({
   input: {
     marginBottom: 10,
     backgroundColor: '#ffffff'
+  },
+  errorText: {
+    marginTop: -8,
+    marginBottom: 8
   },
   actions: {
     flexDirection: 'row',
